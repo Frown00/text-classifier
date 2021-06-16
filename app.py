@@ -1,4 +1,7 @@
-from Reviews import Reviews;
+from ml.SVM import SVM
+from ml.Bayesian import Bayesian
+from data.Reviews import Reviews;
+
 Object = lambda **kwargs: type("Object", (), kwargs)
 
 reviewsData = [
@@ -29,4 +32,41 @@ reviews = Reviews()
 for data in reviewsData:
   reviews.load(contents=data.contents, ratings=data.ratings, classes=data.classes)
 
-reviews.getData()
+reviews.divideByRating()
+crossValidation = 10
+newReviews = [
+  'Pictures, story and sound were amazing', 
+  'Movie about some casual story',
+  'This movie was terrible!'
+]
+# reviews.printStats(nFrequentWords=10, wordsMinLength=5)
+def bayesian():
+  bayesian = Bayesian(
+    reviews.contents, 
+    reviews.classes, 
+    minDf=1, 
+    ngram=(1, 2),
+    maxFeatures=5000
+  )
+  bayesian.train(crossValidation, alpha=1, fit_prior=False)
+  bayesian.predict(newReviews)
+
+def svm():
+  svm = SVM(
+    reviews.contents, 
+    reviews.classes, 
+    minDf=1,
+    ngram=(1, 2),
+    maxFeatures=5000
+  )
+  svm.train(
+    k=crossValidation, 
+    tol=0.0001, 
+    C=1, 
+    max_iter=1000
+  )
+  svm.predict(newReviews)
+
+# Execute
+bayesian()
+svm()
